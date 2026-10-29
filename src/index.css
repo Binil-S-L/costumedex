@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #111;
+  font-family: 'VT323', monospace;
+  -webkit-text-size-adjust: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#root {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+:root {
+  --font-vt: 'VT323', monospace;
+  --font-8bit: 'Press Start 2P', monospace;
+  --screen-bg: #0a1628;
+  --screen-green: #7ac000;
+  --lcd-amber: #ff8800;
+  --lcd-orange: #ff6600;
+  --shell-red: #cc1100;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid rgba(255, 200, 0, 0.6);
+  outline-offset: 2px;
+}

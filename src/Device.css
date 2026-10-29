@@ -1,0 +1,466 @@
+/* ─── Outer shell ─────────────────────────────────────────── */
+.device {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* Glossy red shell */
+  background:
+    radial-gradient(ellipse at 22% 8%, rgba(255, 110, 80, 0.38) 0%, transparent 52%),
+    linear-gradient(
+      172deg,
+      #e82012 0%,
+      #cc1000 22%,
+      #aa0800 52%,
+      #990700 74%,
+      #bb1000 100%
+    );
+
+  box-shadow:
+    inset 0 3px 10px rgba(255, 130, 100, 0.22),
+    inset 0 -5px 10px rgba(0, 0, 0, 0.42),
+    inset 4px 0 8px rgba(255, 70, 50, 0.08),
+    inset -4px 0 8px rgba(0, 0, 0, 0.16);
+
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Gloss highlight — top half */
+.device::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 42%;
+  background: linear-gradient(
+    182deg,
+    rgba(255, 200, 180, 0.13) 0%,
+    rgba(255, 100, 80, 0.04) 68%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 500;
+}
+
+/* ─── Top panel: lens + LEDs ──────────────────────────────── */
+.topPanel {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 8px 14px 6px;
+  gap: 10px;
+  min-height: 96px;
+}
+
+.lens {
+  flex-shrink: 0;
+  width: clamp(70px, 19vw, 86px);
+  height: clamp(70px, 19vw, 86px);
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle at 33% 28%, rgba(220, 242, 255, 0.88) 0%, rgba(130, 196, 255, 0.7) 13%, transparent 38%),
+    radial-gradient(circle at 66% 72%, rgba(0, 30, 100, 0.55) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, #1155cc 0%, #003399 40%, #001166 68%, #000820 100%);
+
+  border: 3px solid #001050;
+  box-shadow:
+    0 0 0 2px #000d3a,
+    0 0 0 4px rgba(0, 20, 70, 0.55),
+    0 0 18px rgba(80, 155, 255, 0.68),
+    0 0 36px rgba(60, 125, 255, 0.28),
+    inset 0 0 14px rgba(100, 185, 255, 0.18),
+    inset 0 2px 6px rgba(255, 255, 255, 0.28);
+
+  animation: lensPulse 3.2s ease-in-out infinite;
+}
+
+@keyframes lensPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px #000d3a,
+      0 0 0 4px rgba(0, 20, 70, 0.55),
+      0 0 16px rgba(80, 155, 255, 0.62),
+      0 0 32px rgba(60, 125, 255, 0.22),
+      inset 0 0 14px rgba(100, 185, 255, 0.18),
+      inset 0 2px 6px rgba(255, 255, 255, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px #000d3a,
+      0 0 0 4px rgba(0, 20, 70, 0.55),
+      0 0 28px rgba(80, 165, 255, 0.9),
+      0 0 55px rgba(60, 135, 255, 0.5),
+      0 0 72px rgba(40, 100, 255, 0.2),
+      inset 0 0 20px rgba(120, 200, 255, 0.28),
+      inset 0 2px 6px rgba(255, 255, 255, 0.28);
+  }
+}
+
+.leds {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.led {
+  width: clamp(9px, 2.4vw, 12px);
+  height: clamp(9px, 2.4vw, 12px);
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.35);
+  flex-shrink: 0;
+}
+
+.led.red {
+  background: radial-gradient(circle at 35% 32%, #ff9988, #ff1100 52%, #990000);
+  box-shadow: 0 0 5px rgba(255, 30, 0, 0.55);
+}
+.led.yellow {
+  background: radial-gradient(circle at 35% 32%, #ffee88, #ffcc00 52%, #997700);
+  box-shadow: 0 0 5px rgba(255, 200, 0, 0.5);
+}
+.led.green {
+  background: radial-gradient(circle at 35% 32%, #99ff99, #00ee44 52%, #007722);
+  box-shadow: 0 0 5px rgba(0, 238, 60, 0.5);
+}
+
+/* LED states */
+.led.blink {
+  animation: ledBlink 0.42s step-end infinite;
+}
+.led.blink.yellow { animation-delay: 0.14s; }
+.led.blink.green  { animation-delay: 0.28s; }
+
+.led.scanning {
+  animation: ledBlink 0.18s step-end infinite;
+}
+.led.scanning.yellow { animation-delay: 0.06s; }
+.led.scanning.green  { animation-delay: 0.12s; }
+
+@keyframes ledBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.04; }
+}
+
+.deviceTitle {
+  flex: 1;
+  text-align: right;
+  font-family: var(--font-8bit);
+  font-size: clamp(7px, 2.2vw, 10px);
+  color: rgba(255, 218, 200, 0.92);
+  text-shadow:
+    0 0 8px rgba(255, 90, 70, 0.5),
+    1px 1px 2px rgba(0,0,0,0.55);
+  letter-spacing: 1px;
+  line-height: 1.7;
+}
+
+/* ─── Screen bezel ────────────────────────────────────────── */
+.screenBezel {
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 4px 12px;
+  background: #0a0a0a;
+  border: 7px solid #0d0d0d;
+  border-radius: 7px;
+  box-shadow:
+    inset 0 0 0 2px #000,
+    inset 0 3px 10px rgba(0,0,0,0.92),
+    inset 0 -2px 5px rgba(0,0,0,0.75),
+    0 0 0 1px #1a1a1a,
+    0 2px 6px rgba(0,0,0,0.45);
+  position: relative;
+  overflow: hidden;
+}
+
+/* LCD screen inner area */
+.screenInner {
+  position: absolute;
+  inset: 0;
+  background: var(--screen-bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scanline + faint pixel-grid overlay */
+.screenInner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 1px,
+      rgba(0, 0, 0, 0.07) 1px,
+      rgba(0, 0, 0, 0.07) 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(255, 255, 255, 0.012) 3px,
+      rgba(255, 255, 255, 0.012) 4px
+    );
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ─── Speaker grille ──────────────────────────────────────── */
+.speaker {
+  flex-shrink: 0;
+  height: 14px;
+  margin: 3px 22px 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(0,0,0,0.42) 0px,
+    rgba(0,0,0,0.42) 3px,
+    rgba(255,255,255,0.04) 3px,
+    rgba(255,255,255,0.04) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  border-radius: 3px;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.55);
+}
+
+/* ─── Mini status screen ──────────────────────────────────── */
+.miniScreen {
+  flex-shrink: 0;
+  height: 36px;
+  margin: 0 20px 3px;
+  background: #0c1600;
+  border: 2px solid #182200;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 10px rgba(0,0,0,0.85),
+    inset 0 1px 3px rgba(0,0,0,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-family: var(--font-vt);
+  font-size: 20px;
+  color: var(--screen-green);
+  text-shadow: 0 0 6px rgba(100, 200, 0, 0.65);
+  letter-spacing: 2px;
+}
+
+.miniScreen span {
+  opacity: 0.75;
+  font-size: 16px;
+}
+
+/* ─── Control panel ───────────────────────────────────────── */
+.controlPanel {
+  flex-shrink: 0;
+  position: relative;
+  height: clamp(148px, 21dvh, 192px);
+  margin: 0 6px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* ─── D-pad ───────────────────────────────────────────────── */
+.dpad {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  margin-top: 4px;
+}
+
+.dpadArm {
+  position: absolute;
+  background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+  border: 2px solid #0a0a0a;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.07),
+    0 3px 0 #000,
+    0 4px 6px rgba(0,0,0,0.45);
+}
+
+.dpadH {
+  left: 0; right: 0;
+  top: 50%;
+  height: 34px;
+  transform: translateY(-50%);
+  border-radius: 4px 4px 4px 4px;
+}
+
+.dpadV {
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 34px;
+  transform: translateX(-50%);
+}
+
+.dpadCenter {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 34px; height: 34px;
+  transform: translate(-50%, -50%);
+  background: #1a1a1a;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.dpadBtn {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: rgba(255,255,255,0.28);
+  font-size: 11px;
+  transition: color 0.08s;
+  /* extend hit area */
+  padding: 5px;
+  margin: -5px;
+}
+
+.dpadBtn.up    { top: 0;   left: 50%; transform: translateX(-50%); }
+.dpadBtn.down  { bottom: 0; left: 50%; transform: translateX(-50%); }
+.dpadBtn.left  { left: 0;  top: 50%;  transform: translateY(-50%); }
+.dpadBtn.right { right: 0; top: 50%;  transform: translateY(-50%); }
+
+.dpadBtn:active { color: rgba(255,255,255,0.75); }
+
+/* ─── A / B buttons ───────────────────────────────────────── */
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+  margin-right: 4px;
+}
+
+.btnA, .btnB {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-8bit);
+  font-size: 9px;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  transition: transform 0.06s, box-shadow 0.06s;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.btnA {
+  background: radial-gradient(circle at 36% 30%, #ff7766, #dd1100 56%, #990000);
+  box-shadow:
+    0 5px 0 #770000,
+    0 6px 10px rgba(0,0,0,0.5),
+    inset 0 1px 4px rgba(255, 190, 170, 0.38);
+}
+
+.btnA:active {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 #770000,
+    0 2px 5px rgba(0,0,0,0.5),
+    inset 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.btnB {
+  background: radial-gradient(circle at 36% 30%, #555, #333 56%, #222);
+  box-shadow:
+    0 5px 0 #111,
+    0 6px 10px rgba(0,0,0,0.5),
+    inset 0 1px 3px rgba(255,255,255,0.1);
+}
+
+.btnB:active {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 #111,
+    0 2px 5px rgba(0,0,0,0.5),
+    inset 0 2px 4px rgba(0,0,0,0.4);
+}
+
+/* ─── Select / Start ──────────────────────────────────────── */
+.menuButtons {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.menuBtn {
+  height: 14px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+  border: 1.5px solid #0a0a0a;
+  box-shadow:
+    0 3px 0 #000,
+    inset 0 1px 2px rgba(255,255,255,0.07);
+  font-family: var(--font-8bit);
+  font-size: clamp(5px, 1.5vw, 7px);
+  color: rgba(255,255,255,0.45);
+  transition: transform 0.06s, box-shadow 0.06s;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.menuBtn:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 #000, inset 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.menuBtn.voiceOn {
+  color: var(--lcd-amber);
+  text-shadow: 0 0 4px rgba(255, 136, 0, 0.5);
+}
+
+/* ─── Flip camera button (inside CameraView) ──────────────── */
+.flipBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.85);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.flipBtn:active {
+  background: rgba(0,0,0,0.75);
+  transform: scale(0.93);
+}

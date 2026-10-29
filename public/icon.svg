@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" fill="#cc1100" rx="24"/>
+  <!-- Gloss highlight -->
+  <ellipse cx="80" cy="50" rx="70" ry="30" fill="rgba(255,180,160,0.15)"/>
+  <!-- Lens -->
+  <circle cx="62" cy="72" r="38" fill="#001166" stroke="#000820" stroke-width="4"/>
+  <circle cx="62" cy="72" r="28" fill="#1155cc"/>
+  <circle cx="62" cy="72" r="18" fill="#3388ff" opacity="0.7"/>
+  <circle cx="52" cy="60" r="9" fill="white" opacity="0.45"/>
+  <circle cx="56" cy="64" r="4" fill="white" opacity="0.25"/>
+  <!-- LEDs -->
+  <circle cx="118" cy="52" r="7" fill="#ff0000"/>
+  <circle cx="118" cy="68" r="7" fill="#ffcc00"/>
+  <circle cx="118" cy="84" r="7" fill="#00ff44"/>
+  <!-- Title -->
+  <text x="140" y="70" font-family="monospace" font-size="11" fill="rgba(255,220,200,0.9)" text-anchor="middle" font-weight="bold">DEX</text>
+  <!-- Screen area -->
+  <rect x="14" y="118" width="164" height="56" rx="4" fill="#0a1628"/>
+  <text x="96" y="150" font-family="monospace" font-size="14" fill="#7ac000" text-anchor="middle">COSTUMEDEX</text>
+</svg>
