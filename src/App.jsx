@@ -3,6 +3,7 @@ import Device from './Device';
 import CameraView from './CameraView';
 import ScanResult from './ScanResult';
 import DexHistory from './DexHistory';
+import { unlockSpeech, stopSpeech, speakEntry } from './speech';
 import './App.css';
 
 // ─── Utilities ────────────────────────────────────────────
@@ -227,8 +228,10 @@ export default function App() {
   const [currentEntry, setCurrentEntry] = useState(null);
   const [scanCount, setScanCount]     = useState(0);
   const [scanError, setScanError]     = useState(null);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [voiceUnlocked, setVoiceUnlocked] = useState(false);
+  // Voice persisted in localStorage; default off
+  const [voiceEnabled, setVoiceEnabled] = useState(
+    () => localStorage.getItem('costumedex_voice') === 'on'
+  );
 
   const [history, setHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem('costumedex_history') || '[]'); }
@@ -247,10 +250,10 @@ export default function App() {
 
   // A button ── scan or save card
   const handleA = useCallback(async () => {
-    if (!voiceUnlocked) setVoiceUnlocked(true);
-
     if (screen === 'camera') {
-      // Check for pending file from fallback input
+      // Unlock speech synchronously inside the user-gesture handler (iOS requirement)
+      unlockSpeech();
+
       let base64 = null;
       if (cameraRef.current?._pendingFile) {
         base64 = cameraRef.current._pendingFile;
@@ -260,6 +263,7 @@ export default function App() {
       }
       if (!base64) return;
 
+      stopSpeech(); // stop any playing entry before new scan
       frozenImageRef.current = base64;
       setScreen('scanning');
       setLedState('scanning');
@@ -301,13 +305,7 @@ export default function App() {
         setLedState('ready');
         setScreen('result');
 
-        if (voiceEnabled && voiceUnlocked && 'speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utt = new SpeechSynthesisUtterance(apiRes.description);
-          utt.rate = 0.88;
-          utt.pitch = 0.84;
-          window.speechSynthesis.speak(utt);
-        }
+        if (voiceEnabled) speakEntry(entry);
       } catch (err) {
         setScanError(err.message || 'SIGNAL LOST');
         setLedState('blinking');
@@ -323,31 +321,33 @@ export default function App() {
     } else if (screen === 'result' && currentEntry) {
       await saveCard(currentEntry);
     }
-  }, [screen, scanCount, currentEntry, voiceEnabled, voiceUnlocked]);
+  }, [screen, scanCount, currentEntry, voiceEnabled]);
 
-  // B button ── back
+  // B button ── back (stop speech when leaving result)
   const handleB = useCallback(() => {
     if (screen === 'result' || screen === 'history' || screen === 'error') {
+      stopSpeech();
       setScreen('camera');
       frozenImageRef.current = null;
     }
   }, [screen]);
 
-  // Start ── toggle Dex
+  // Start ── toggle Dex (stop speech when leaving result)
   const handleStart = useCallback(() => {
     if (screen === 'camera') setScreen('history');
     else if (screen === 'history') setScreen('camera');
-    else if (screen === 'result') setScreen('history');
+    else if (screen === 'result') { stopSpeech(); setScreen('history'); }
   }, [screen]);
 
-  // Select ── toggle voice
+  // Select ── toggle voice, persisted in localStorage
   const handleSelect = useCallback(() => {
-    if (!voiceUnlocked) setVoiceUnlocked(true);
-    setVoiceEnabled(v => !v);
-    if (voiceEnabled && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-  }, [voiceEnabled, voiceUnlocked]);
+    setVoiceEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('costumedex_voice', next ? 'on' : 'off');
+      if (!next) stopSpeech();
+      return next;
+    });
+  }, []);
 
   // D-pad scroll
   const handleDpadUp   = useCallback(() => scrollRef.current?.scrollBy({ top: -72, behavior: 'smooth' }), []);
